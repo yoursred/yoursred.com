@@ -1,0 +1,2 @@
+# yoursred.com
+Shitpost
