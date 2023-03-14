@@ -1,2 +1,2 @@
 # yoursred.com
-Shitpost
+Landing page?
