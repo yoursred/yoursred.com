@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      F HCI calculator
+    </title>
+    <style>
+      :root {
+        /* Color tokens — light, neutral, calm */
+        --color-background-primary: #ffffff;
+        --color-background-secondary: #f6f5f1;
+        --color-background-tertiary: #efede6;
+        --color-background-warning: #faeeda;
+        --color-background-danger: #fcebeb;
+        --color-background-info: #e6f1fb;
+    
+        --color-text-primary: #1a1a1a;
+        --color-text-secondary: #6b6a64;
+        --color-text-tertiary: #94938d;
+        --color-text-warning: #854f0b;
+        --color-text-danger: #a32d2d;
+        --color-text-info: #185fa5;
+    
+        --color-border-tertiary: rgba(0, 0, 0, 0.08);
+        --color-border-secondary: rgba(0, 0, 0, 0.15);
+        --color-border-primary: rgba(0, 0, 0, 0.25);
+    
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --border-radius-xl: 16px;
+    
+        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      }
+    
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-background-primary: #1f1e1c;
+          --color-background-secondary: #2a2926;
+          --color-background-tertiary: #191816;
+          --color-background-warning: #3a2a10;
+          --color-background-danger: #3a1818;
+          --color-background-info: #142a44;
+    
+          --color-text-primary: #ececea;
+          --color-text-secondary: #a8a7a1;
+          --color-text-tertiary: #76756f;
+          --color-text-warning: #fac775;
+          --color-text-danger: #f09595;
+          --color-text-info: #85b7eb;
+    
+          --color-border-tertiary: rgba(255, 255, 255, 0.1);
+          --color-border-secondary: rgba(255, 255, 255, 0.18);
+          --color-border-primary: rgba(255, 255, 255, 0.28);
+        }
+      }
+    
+      /* Page shell */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--color-background-tertiary);
+        color: var(--color-text-primary);
+        font-family: var(--font-sans);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+    
+      body {
+        max-width: 720px;
+        margin: 2.5rem auto;
+        padding: 2rem 1.5rem 4rem;
+      }
+    
+      h1,
+      h2,
+      h3 {
+        font-weight: 500;
+        letter-spacing: -0.01em;
+      }
+    
+      h1 {
+        font-size: 22px;
+        margin: 0 0 1.5rem;
+      }
+    
+      /* Form controls — flat, calm, consistent */
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        box-sizing: border-box;
+        height: 36px;
+        padding: 0 10px;
+        font: inherit;
+        font-size: 14px;
+        color: var(--color-text-primary);
+        background: var(--color-background-primary);
+        border: 0.5px solid var(--color-border-tertiary);
+        border-radius: var(--border-radius-md);
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+    
+      input[type="text"]:hover,
+      input[type="number"]:hover {
+        border-color: var(--color-border-secondary);
+      }
+    
+      input[type="text"]:focus,
+      input[type="number"]:focus {
+        outline: none;
+        border-color: var(--color-border-primary);
+        box-shadow: 0 0 0 3px rgba(80, 80, 200, 0.12);
+      }
+    
+      /* Remove spinner clutter on number inputs */
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+    
+      /* Checkbox accent */
+      input[type="checkbox"] {
+        accent-color: #534ab7;
+      }
+    
+      /* Buttons */
+      button {
+        font: inherit;
+        font-size: 14px;
+        color: var(--color-text-primary);
+        background: transparent;
+        border: 0.5px solid var(--color-border-secondary);
+        border-radius: var(--border-radius-md);
+        padding: 8px 14px;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.05s;
+      }
+    
+      button:hover {
+        background: var(--color-background-secondary);
+      }
+    
+      button:active {
+        transform: scale(0.98);
+      }
+    
+      /* Screen-reader-only utility used in the widget */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+    
+    <!-- Optional: Tabler icons, used by the widget for ti-plus / ti-trash / ti-refresh -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
+  </head>
+  <body>
+<div style="padding: 0.5rem 0;">
+  <h2 class="sr-only">Module grade and condonation calculator</h2>
+
+  <div
+    style="background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+      <div>
+        <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px;">Overall mean</div>
+        <div style="font-size: 24px; font-weight: 500;" id="mean-out">—</div>
+      </div>
+      <div>
+        <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px;">Classification</div>
+        <div style="font-size: 16px; font-weight: 500;" id="class-out">—</div>
+      </div>
+      <div>
+        <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px;">Condoned credits</div>
+        <div style="font-size: 16px; font-weight: 500;" id="condoned-out">0</div>
+      </div>
+    </div>
+    <div id="warnings" style="margin-top: 12px; font-size: 13px;"></div>
+  </div>
+
+  <div
+    style="display: grid; grid-template-columns: 1.4fr 0.7fr 0.9fr 0.9fr 0.4fr; gap: 8px; padding: 0 4px 8px; font-size: 12px; color: var(--color-text-secondary);">
+    <div>Module name</div>
+    <div>Mark (%)</div>
+    <div>Credits</div>
+    <div>Condone?</div>
+    <div></div>
+  </div>
+
+  <div id="rows"></div>
+
+  <div style="display: flex; gap: 8px; margin-top: 12px;">
+    <button id="add-row" style="flex: 1;">
+      <i class="ti ti-plus" aria-hidden="true" style="font-size: 16px; vertical-align: -2px; margin-right: 6px;"></i>Add
+      module
+    </button>
+    <button id="reset-btn" style="flex: 0 0 auto;">
+      <i class="ti ti-refresh" aria-hidden="true" style="font-size: 16px; vertical-align: -2px;"></i>
+    </button>
+  </div>
+
+  <div
+    style="margin-top: 1.5rem; padding: 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); font-size: 12px; color: var(--color-text-secondary); line-height: 1.6;">
+    Marks are converted to aggregation scores using the MARP percentage table. A condoned module's actual score still
+    counts toward the mean — ticking the box only flags it visually and counts the credits toward the condonation cap.
+  </div>
+</div>
+
+<script>
+  (function () {
+    // Percentage to aggregation score (from Appendix 2)
+    function pctToAgg(p) {
+      if (p === '' || p === null || isNaN(p)) return null;
+      p = Math.max(0, Math.min(100, Number(p)));
+      if (p <= 40) return p * 0.225;
+      if (p <= 80) return 9 + (p - 40) * 0.300;
+      return 21 + (p - 80) * 0.150;
+    }
+
+    function classify(mean) {
+      if (mean >= 17.5) return { name: "First", color: "c-teal", stop: "#0F6E56" };
+      if (mean >= 17.1) return { name: "1st / 2:1 borderline", color: "c-teal", stop: "#0F6E56" };
+      if (mean >= 14.5) return { name: "Upper second (2:1)", color: "c-blue", stop: "#185FA5" };
+      if (mean >= 14.1) return { name: "2:1 / 2:2 borderline", color: "c-blue", stop: "#185FA5" };
+      if (mean >= 11.5) return { name: "Lower second (2:2)", color: "c-purple", stop: "#534AB7" };
+      if (mean >= 11.1) return { name: "2:2 / 3rd borderline", color: "c-purple", stop: "#534AB7" };
+      if (mean >= 9.0) return { name: "Third", color: "c-amber", stop: "#854F0B" };
+      if (mean >= 8.1) return { name: "Pass / fail borderline", color: "c-amber", stop: "#854F0B" };
+      return { name: "Fail", color: "c-red", stop: "#A32D2D" };
+    }
+
+    const rowsEl = document.getElementById('rows');
+    let rowId = 0;
+    const defaults = [
+      { name: 'Group Project', mark: 50, credits: 20, condone: false },
+      { name: 'Software Design', mark: 50, credits: 15, condone: false },
+      { name: 'Advanced Programming', mark: 50, credits: 15, condone: false },
+      { name: 'Data Engineering', mark: 50, credits: 15, condone: false },
+      { name: 'AI', mark: 50, credits: 10, condone: false },
+      { name: 'Networks', mark: 50, credits: 15, condone: false },
+      { name: 'Concurrent/Algorithms', mark: 50, credits: 10, condone: false },
+      { name: 'Cyber Sec', mark: 50, credits: 10, condone: false },
+      { name: 'HCI', mark: 50, credits: 15, condone: false }
+    ];
+
+    function makeRow(data) {
+      const id = ++rowId;
+      const row = document.createElement('div');
+      row.style.cssText = 'display: grid; grid-template-columns: 1.4fr 0.7fr 0.9fr 0.9fr 0.4fr; gap: 8px; margin-bottom: 8px; align-items: center;';
+      row.dataset.id = id;
+      row.innerHTML = `
+      <input type="text" class="r-name" value="${data.name || ''}" placeholder="Module name" />
+      <input type="number" class="r-mark" value="${data.mark ?? ''}" min="0" max="100" step="1" placeholder="0–100" />
+      <input type="number" class="r-credits" value="${data.credits ?? ''}" min="0" step="5" placeholder="e.g. 15" />
+      <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; padding-left: 4px;">
+        <input type="checkbox" class="r-condone" ${data.condone ? 'checked' : ''} style="width: 16px; height: 16px; cursor: pointer;" />
+        <span class="r-condone-label" style="color: var(--color-text-secondary);">No</span>
+      </label>
+      <button class="r-del" aria-label="Remove module" style="padding: 6px;">
+        <i class="ti ti-trash" aria-hidden="true" style="font-size: 16px;"></i>
+      </button>
+    `;
+      rowsEl.appendChild(row);
+      row.querySelectorAll('input').forEach(i => i.addEventListener('input', recalc));
+      row.querySelector('.r-condone').addEventListener('change', function () {
+        row.querySelector('.r-condone-label').textContent = this.checked ? 'Yes' : 'No';
+        recalc();
+      });
+      row.querySelector('.r-del').addEventListener('click', function () {
+        row.remove();
+        recalc();
+      });
+    }
+
+    function recalc() {
+      const rows = rowsEl.querySelectorAll('[data-id]');
+      let totalCredits = 0;
+      let weightedAgg = 0;
+      let condonedCredits = 0;
+      let condonedBelow7 = false;
+      let condonedAbove9 = false;
+      let anyValid = false;
+
+      rows.forEach(row => {
+        const mark = row.querySelector('.r-mark').value;
+        const credits = parseFloat(row.querySelector('.r-credits').value);
+        const condone = row.querySelector('.r-condone').checked;
+        const agg = pctToAgg(mark);
+        if (agg !== null && !isNaN(credits) && credits > 0) {
+          anyValid = true;
+          totalCredits += credits;
+          weightedAgg += agg * credits;
+          // Visual cue on the row if condoned
+          if (condone) {
+            condonedCredits += credits;
+            row.style.background = 'var(--color-background-warning)';
+            row.style.borderRadius = 'var(--border-radius-md)';
+            row.style.padding = '4px';
+            if (agg < 7.0) condonedBelow7 = true;
+            if (agg >= 9.0) condonedAbove9 = true;
+          } else {
+            row.style.background = '';
+            row.style.padding = '';
+          }
+        } else {
+          row.style.background = '';
+          row.style.padding = '';
+        }
+      });
+
+      const meanOut = document.getElementById('mean-out');
+      const classOut = document.getElementById('class-out');
+      const condonedOut = document.getElementById('condoned-out');
+      const warningsEl = document.getElementById('warnings');
+
+      if (!anyValid || totalCredits === 0) {
+        meanOut.textContent = '—';
+        classOut.textContent = '—';
+        classOut.style.color = '';
+        condonedOut.textContent = '0';
+        warningsEl.innerHTML = '';
+        return;
+      }
+
+      const mean = weightedAgg / totalCredits;
+      const cls = classify(mean);
+      meanOut.textContent = mean.toFixed(2);
+      classOut.textContent = cls.name;
+      classOut.style.color = cls.stop;
+      condonedOut.textContent = Math.round(condonedCredits);
+
+      // Warnings
+      const warnings = [];
+      if (condonedBelow7) {
+        warnings.push('<span style="color: var(--color-text-danger);"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:14px; vertical-align:-2px; margin-right:4px;"></i>A flagged module has a score below 7.0 — cannot normally be condoned.</span>');
+      }
+      if (condonedAbove9) {
+        warnings.push('<span style="color: var(--color-text-secondary);"><i class="ti ti-info-circle" aria-hidden="true" style="font-size:14px; vertical-align:-2px; margin-right:4px;"></i>A flagged module is at or above 9.0 — already a pass, condonation not needed.</span>');
+      }
+      if (condonedCredits > 45) {
+        warnings.push('<span style="color: var(--color-text-danger);"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:14px; vertical-align:-2px; margin-right:4px;"></i>Over 45 condoned credits — exceeds the cap for a 4-year Bachelors (3-year cap is 30).</span>');
+      } else if (condonedCredits > 30) {
+        warnings.push('<span style="color: var(--color-text-warning);"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:14px; vertical-align:-2px; margin-right:4px;"></i>Over 30 condoned credits — exceeds the cap for a 3-year Bachelors (within the 45-credit cap for 4-year programmes).</span>');
+      }
+      warningsEl.innerHTML = warnings.join('<br>');
+    }
+
+    document.getElementById('add-row').addEventListener('click', function () {
+      makeRow({ name: '', mark: '', credits: 15, condone: false });
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', function () {
+      rowsEl.innerHTML = '';
+      defaults.forEach(makeRow);
+      recalc();
+    });
+
+    defaults.forEach(makeRow);
+    recalc();
+  })();
+</script>
+  </body>
+</html>
+
