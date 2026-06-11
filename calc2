@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H₂SO₄ + HCOOH Reaction Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { text-align: center; color: #333; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        #results { margin-top: 20px; padding: 15px; background: #e9f7ef; border-radius: 8px; }
+        canvas { max-width: 100%; height: 400px !important; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sulfuric Acid + Formic Acid Reaction Calculator</h1>
+        <p><strong>Reaction:</strong> HCOOH (formic acid) → CO (carbon monoxide) + H₂O (catalyzed by conc. H₂SO₄)</p>
+        
+        <label>Volume of Formic Acid (mL):</label>
+        <input type="number" id="volFormic" value="10" step="0.1">
+        
+        <label>Concentration of Formic Acid (% w/w):</label>
+        <input type="number" id="concFormic" value="85" min="1" max="100">
+        
+        <label>Volume of Concentrated Sulfuric Acid (mL):</label>
+        <input type="number" id="volSulfuric" value="20" step="0.1">
+        
+        <label>Concentration of Sulfuric Acid (% w/w):</label>
+        <input type="number" id="concSulfuric" value="98" min="1" max="100">
+        
+        <label>Temperature (°C):</label>
+        <input type="number" id="temp" value="80" step="1">
+        
+        <button onclick="calculateReaction()">Calculate & Plot</button>
+        
+        <div id="results"></div>
+        <canvas id="graph"></canvas>
+    </div>
+
+    <script>
+        let chart;
+        
+        function calculateReaction() {
+            const volF = parseFloat(document.getElementById('volFormic').value) || 10;
+            const concF = parseFloat(document.getElementById('concFormic').value) || 85;
+            const volS = parseFloat(document.getElementById('volSulfuric').value) || 20;
+            const concS = parseFloat(document.getElementById('concSulfuric').value) || 98;
+            const temp = parseFloat(document.getElementById('temp').value) || 80;
+            
+            // Approximate densities
+            const densityFormic = 1.22; // g/mL for ~85%
+            const densitySulfuric = 1.84; // g/mL for 98%
+            
+            const massFormic = volF * densityFormic * (concF / 100);
+            const molesFormic = massFormic / 46.03; // MW HCOOH
+            
+            const massSulfuric = volS * densitySulfuric * (concS / 100);
+            const molesSulfuric = massSulfuric / 98.08; // MW H2SO4 (catalyst)
+            
+            // Limiting reactant is formic acid (1:1 stoichiometry)
+            const molesCO = molesFormic;
+            const volumeCO_L = molesCO * 22.4 * (273 + temp) / 273; // Ideal gas at temp (approx)
+            const volumeCO_mL = volumeCO_L * 1000;
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h3>Results:</h3>
+                <p><strong>Moles of Formic Acid:</strong> ${molesFormic.toFixed(4)} mol</p>
+                <p><strong>Moles of CO produced:</strong> ${molesCO.toFixed(4)} mol</p>
+                <p><strong>Volume of CO (at ${temp}°C, 1 atm):</strong> ${volumeCO_mL.toFixed(1)} mL</p>
+                <p><strong>Sulfuric Acid (catalyst) used:</strong> ${molesSulfuric.toFixed(3)} mol</p>
+                <p style="color: #d32f2f;"><em>Warning: This reaction produces toxic CO gas. Handle with extreme caution in a fume hood.</em></p>
+            `;
+            
+            // Plot reaction progress / CO production vs formic acid added
+            plotGraph(volF, molesCO, temp);
+        }
+        
+        function plotGraph(maxVol, maxCO, temp) {
+            const ctx = document.getElementById('graph').getContext('2d');
+            
+            if (chart) chart.destroy();
+            
+            const labels = [];
+            const coVolumes = [];
+            const formicMoles = [];
+            
+            for (let v = 0; v <= maxVol; v += maxVol / 20) {
+                labels.push(v.toFixed(1));
+                const massF = v * 1.22 * 0.85; // approximate
+                const molesF = massF / 46.03;
+                const coVol = molesF * 22.4 * (273 + temp) / 273 * 1000;
+                coVolumes.push(coVol.toFixed(1));
+                formicMoles.push(molesF.toFixed(4));
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `CO Volume (mL) at ${temp}°C`,
+                            data: coVolumes,
+                            borderColor: '#d32f2f',
+                            backgroundColor: 'rgba(211, 47, 47, 0.2)',
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Moles Formic Acid',
+                            data: formicMoles,
+                            borderColor: '#1976d2',
+                            backgroundColor: 'rgba(25, 118, 210, 0.2)',
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'CO Production vs Formic Acid Added'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'CO Volume (mL)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Moles HCOOH' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initial calculation
+        window.onload = calculateReaction;
+    </script>
+</body>
+</html>
